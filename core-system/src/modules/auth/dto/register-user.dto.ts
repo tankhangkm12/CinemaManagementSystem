@@ -1,6 +1,6 @@
-import { IsEmail, IsNotEmpty, IsString, IsOptional, IsBoolean, MinLength, IsPhoneNumber } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, MinLength } from 'class-validator';
 
-export class CreateUserDto {
+export class RegisterUserDto {
     @IsString({ message: 'Tên phải là một chuỗi ký tự' })
     @IsNotEmpty({ message: 'Tên không được để trống' })
     name !: string;
@@ -13,18 +13,6 @@ export class CreateUserDto {
     @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
     @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
     password !: string;
-
-    @IsString()
-    @IsOptional()
-    role_id ?: string | undefined = undefined;
-
-    @IsString()
-    @IsNotEmpty({ message: 'Role không được để trống' })
-    role !: string
-
-    @IsString()
-    @IsOptional() // Vì mặc định là null trong schema
-    tenant_id?: string | undefined;
 
     @IsString()
     @IsNotEmpty({ message: 'Số điện thoại không được để trống' })

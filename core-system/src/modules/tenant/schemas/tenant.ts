@@ -2,7 +2,7 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-
+import { nanoid } from 'nanoid';
 
 export enum SubscriptionStatus {
     ACTIVE = 'active',
@@ -15,6 +15,16 @@ export enum SubscriptionStatus {
     collection: 'tenant',
 })
 export class Tenant {
+
+    @Prop({
+        type: String,
+        unique: true,
+        index: true,
+        default: nanoid(12)
+    })
+    tenant_id !: string;
+
+
     @Prop({
         type: String,
         required: true,

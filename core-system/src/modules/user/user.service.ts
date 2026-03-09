@@ -1,25 +1,27 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { hash } from 'src/common/utils';
 import { TenantService } from '../tenant/tenant.service';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @Inject(UserRepository) private readonly userRepository : UserRepository,
-        @Inject(TenantService) private readonly tenantService : TenantService
+        @Inject(TenantService) private readonly tenantService : TenantService,
+        @Inject(RoleService) private readonly roleService : RoleService
     ) {}
 
 
     async createUser(
-        createUserDto : CreateUserDto | 
-        {name : string, email : string, password : string,tenant_id : string, role_id : string,phone : string}
+        createUserDto : CreateUserDto
     ) : Promise<any> {
-        const [foundedEmail, foundPhone, foundTenant] = await Promise.all([
+        const [foundedEmail, foundPhone, foundTenant,foundRole] = await Promise.all([
             this.userRepository.checkUserExistByEmail(createUserDto.email),
             this.userRepository.checkUserExistByPhone(createUserDto.phone),
-            createUserDto.tenant_id ? this.tenantService.checkTenantExistById(createUserDto.tenant_id) : null
+            createUserDto.tenant_id ? this.tenantService.checkTenantExistById(createUserDto.tenant_id) : null,
+            this.roleService.checkRoleExistByCode(createUserDto.role)
         ])
         if (foundedEmail){
             throw new BadRequestException('Emall already used')
@@ -32,9 +34,22 @@ export class UserService {
             throw new BadRequestException('Tenant not found')
         }
 
+        if (!foundRole){
+            throw new BadRequestException('Role not found')
+        }
+        console.log({createUserDto})
+        
+        createUserDto.role_id = foundRole._id
+
         createUserDto.password = await hash(createUserDto.password)
 
-        return await this.userRepository.createUser(createUserDto)
+
+        const newUser = await this.userRepository.createUser(createUserDto)
+
+        if (!newUser){
+            throw new InternalServerErrorException('Create user failled')
+        }
+        return newUser
     }
 
     async getUserById(id : string) : Promise<any> {

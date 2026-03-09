@@ -14,4 +14,15 @@ export const envValidationSchema = Joi.object({
 
   MONGO_PASS: Joi.string().optional(),
 
+  ACCESS_TOKEN_SECRET: Joi.string().required(),
+
+  REFRESH_TOKEN_SECRET: Joi.string().required(),
+
+  JWT_ACCESS_EXPIRES_IN: Joi.string().required(),
+
+  JWT_REFRESH_EXPIRES_IN: Joi.string().required(),
+
+  REDIS_HOST: Joi.string().required(),
+
+  REDIS_PORT: Joi.string().required(),
 });

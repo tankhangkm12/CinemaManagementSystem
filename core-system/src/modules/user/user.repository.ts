@@ -2,6 +2,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "./schemas/user.schema";
 import { Model } from "mongoose";
 import { CreateUserDto } from "./dto/create-user.dto";
+import { RegisterUserDto } from "../auth/dto/register-user.dto";
 
 export abstract class UserRepository{
     abstract createUser(createUserDto : CreateUserDto): Promise<any>
@@ -24,10 +25,14 @@ export class MongoDbUserRepository extends UserRepository{
     }
 
     async getUserById(id : string): Promise<any> {
-        return await this.userModel.findOne({_id : id,is_active : true}).select({
+        return await this.userModel.findOne({userId : id,is_active : true}).select({
             password : 0,
             is_active : 0,
-            _id : 0
+            _id : 0,
+            tenant_id:0,
+            __v:0,
+            createdAt:0,
+            updatedAt:0
         })
     }
 

@@ -1,11 +1,13 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, HydratedDocument } from "mongoose";
-
+import {v4 as uuidv4} from 'uuid';
 @Schema({
     timestamps: true,
     collection: 'users'
 })
 export class User extends Document {
+    @Prop({ type: String, required: true, default : uuidv4 })
+    userId !: string
 
     @Prop({ type: String, required: true })
     name !: string
