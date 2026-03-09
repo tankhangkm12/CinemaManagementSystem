@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { MongoDbUserRepository, UserRepository } from './user.repository';
 import { TenantModule } from '../tenant/tenant.module';
+import { RoleModule } from '../role/role.module';
 
 @Module({
   imports : [
@@ -14,7 +15,7 @@ import { TenantModule } from '../tenant/tenant.module';
         schema: UserSchema
       }
     ]),
-    TenantModule
+    TenantModule, RoleModule
   ],
   controllers: [UserController],
   providers: [
@@ -24,6 +25,6 @@ import { TenantModule } from '../tenant/tenant.module';
       useClass: MongoDbUserRepository
     }
   ],
-  exports : [UserModule]
+  exports : [UserService]
 })
 export class UserModule {}

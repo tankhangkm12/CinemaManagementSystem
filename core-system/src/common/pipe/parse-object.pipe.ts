@@ -3,9 +3,9 @@ import { isEmail } from 'class-validator';
 import { Types } from 'mongoose';
 
 @Injectable()
-export class ParseObjectIdPipe implements PipeTransform {
+export class ParseUuidPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
-      if (!Types.ObjectId.isValid(value)){
+      if (!Types.UUID.isValid(value)){
           throw new BadRequestException('ID không hợp lệ')
       }
       return value
