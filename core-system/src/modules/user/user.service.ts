@@ -1,9 +1,11 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { hash } from 'src/common/utils';
 import { TenantService } from '../tenant/tenant.service';
 import { RoleService } from '../role/role.service';
+import { CreateUserResponseDto, GetUserResponseDto } from './dto/create-user.response.dto';
+import { CreateUserPayload } from './interfaces/user.payload';
 
 @Injectable()
 export class UserService {
@@ -14,45 +16,55 @@ export class UserService {
     ) {}
 
 
-    async createUser(
-        createUserDto : CreateUserDto
-    ) : Promise<any> {
-        const [foundedEmail, foundPhone, foundTenant,foundRole] = await Promise.all([
+    async createUser(createUserDto: CreateUserDto): Promise<CreateUserResponseDto> {
+    // 1. Check duplicate + resolve role + tenant song song
+        const [foundEmail, foundPhone, foundTenant, foundRole] = await Promise.all([
             this.userRepository.checkUserExistByEmail(createUserDto.email),
             this.userRepository.checkUserExistByPhone(createUserDto.phone),
-            createUserDto.tenant_id ? this.tenantService.checkTenantExistById(createUserDto.tenant_id) : null,
-            this.roleService.checkRoleExistByCode(createUserDto.role)
-        ])
-        if (foundedEmail){
-            throw new BadRequestException('Emall already used')
-        }
-        if (foundPhone){
-            throw new BadRequestException('Phone already used')
-        }
+            createUserDto.tenant ? this.tenantService.checkTenantExistById(createUserDto.tenant) : null,
+            this.roleService.checkRoleExistByCode(createUserDto.role),
+        ]);
 
-        if (!foundTenant && createUserDto.tenant_id){
-            throw new BadRequestException('Tenant not found')
-        }
+        if (foundEmail) throw new ConflictException('Email already used');
+        if (foundPhone) throw new ConflictException('Phone already used');
+        if (!foundRole) throw new NotFoundException('Role not found');
+        if (createUserDto.tenant && !foundTenant) throw new NotFoundException('Tenant not found');
 
-        if (!foundRole){
-            throw new BadRequestException('Role not found')
-        }
-        console.log({createUserDto})
-        
-        createUserDto.role_id = foundRole._id
+        // 2. Build payload
+        const payload: CreateUserPayload = {
+            name: createUserDto.name,
+            email: createUserDto.email,
+            password: await hash(createUserDto.password),
+            phone: createUserDto.phone,
+            role: {
+                role_id: foundRole._id.toString(),
+                role_code: foundRole.code,
+            },
+            tenant: foundTenant ? {
+                tenant_id: foundTenant.tenant_id,
+                tenant_name: foundTenant.name,
+            } : null,
+        };
 
-        createUserDto.password = await hash(createUserDto.password)
+        // 3. Tạo user
+        const newUser = await this.userRepository.createUser(payload);
 
+        if (!newUser) throw new InternalServerErrorException('Create user failed');
 
-        const newUser = await this.userRepository.createUser(createUserDto)
-
-        if (!newUser){
-            throw new InternalServerErrorException('Create user failled')
-        }
-        return newUser
+        // 4. Map response
+        return {
+            userId: newUser.userId,
+            name: newUser.name,
+            email: newUser.email,
+            phone: newUser.phone,
+            role: newUser.role,
+            tenant: newUser.tenant ?? null,
+            is_active: newUser.is_active,
+            createdAt: newUser.createdAt,
+        };
     }
 
-    async getUserById(id : string) : Promise<any> {
+    async getUserById(id : string) : Promise<GetUserResponseDto> {
         const user = await this.userRepository.getUserById(id)
 
         if (!user){
@@ -67,6 +79,19 @@ export class UserService {
         if (!user){
             throw new BadRequestException('User not found')
         }
-        return user
+
+        return {
+            userId: user.userId,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            tenant: user.tenant ?? null
+        };
+    }
+
+    async getUserForAuth(email : string) : Promise<any> {
+        return await this.userRepository.getUserByEmail(email)
+
     }
 }

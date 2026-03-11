@@ -17,5 +17,6 @@ import { MongoDbPlanRepository, PlanRepository } from './plan.repository';
       useClass: MongoDbPlanRepository,
     }
   ],
+  exports : [PlanService]
 })
 export class PlanModule {}

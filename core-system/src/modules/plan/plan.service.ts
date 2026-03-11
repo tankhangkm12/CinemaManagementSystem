@@ -47,4 +47,8 @@ export class PlanService {
         }
         return updated
     }
+
+    async checkPlanExistByCode(code : string) : Promise<any> {
+        return await this.planRepository.checkPlanExists(code)
+    }
 }
