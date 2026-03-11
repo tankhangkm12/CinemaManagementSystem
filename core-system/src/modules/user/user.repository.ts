@@ -1,11 +1,10 @@
 import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "./schemas/user.schema";
 import { Model } from "mongoose";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { RegisterUserDto } from "../auth/dto/register-user.dto";
+import { CreateUserPayload } from "./interfaces/user.payload";
 
 export abstract class UserRepository{
-    abstract createUser(createUserDto : CreateUserDto): Promise<any>
+    abstract createUser(createUserPayload : CreateUserPayload): Promise<any>
     abstract getUserById(id : string): Promise<any>
     abstract checkUserExistByEmail(email : string): Promise<any>
     abstract checkUserExistByPhone(phone : string): Promise<any> 
@@ -20,8 +19,8 @@ export class MongoDbUserRepository extends UserRepository{
         super()
     }
 
-    async createUser(createUserDto: CreateUserDto): Promise<any> {
-        return await this.userModel.create(createUserDto)
+    async createUser(createUserPayload: CreateUserPayload): Promise<any> {
+        return await this.userModel.create(createUserPayload)
     }
 
     async getUserById(id : string): Promise<any> {
@@ -37,14 +36,14 @@ export class MongoDbUserRepository extends UserRepository{
     }
 
     async checkUserExistByEmail(email : string): Promise<any> {
-        return await this.userModel.exists({email : email, is_active : true})
+        return await this.userModel.exists({email : email})
     }
 
     async checkUserExistByPhone(phone: string): Promise<any> {
-        return await this.userModel.exists({phone : phone, is_active : true})
+        return await this.userModel.exists({phone : phone})
     }
 
     async getUserByEmail(email: string): Promise<any> {
-        return await this.userModel.findOne({email : email, is_active : true})
+        return await this.userModel.findOne({email : email})
     }
 }

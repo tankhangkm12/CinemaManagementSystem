@@ -14,6 +14,8 @@ export abstract class PlanRepository {
     abstract updateMaxBranches(code : string, max_branches : number): Promise<any>
 
     abstract checkPlanExists(code : string): Promise<any>
+
+    abstract getPlanByCode(code : string): Promise<any>
 }
 
 export class MongoDbPlanRepository extends PlanRepository {
@@ -51,8 +53,13 @@ export class MongoDbPlanRepository extends PlanRepository {
     }
 
     async checkPlanExists(code: string): Promise<any> {
-        return await this.planModel.exists({code : code, is_active : true})
+        return await this.planModel.findOne({code : code, is_active : true}).select({code : 1,_id : 1}).lean()
     }
+
+    async getPlanByCode(code : string): Promise<any> {
+        return await this.planModel.findOne({code : code, is_active : true}).lean()
+    }
+
 
 
 }

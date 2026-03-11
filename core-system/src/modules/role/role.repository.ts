@@ -36,7 +36,10 @@ export class MongoDbRoleRepository extends RoleRepository {
     }
 
     async checkRoleExistByCode(code: string): Promise<any> {
-        return await this.roleModel.exists({ code , is_active: true}).lean()
+        return this.roleModel
+            .findOne({ code, is_active: true })
+            .select({ _id: 1, code: 1 })
+            .lean();
     }
 
     async checkPermissionExistByCode(code: string): Promise<boolean> {
@@ -58,6 +61,9 @@ export class MongoDbRoleRepository extends RoleRepository {
         const found = await this.roleModel.findOne({
             _id :  roleId, is_active: true
         }).populate('permissions_ids').lean()
+
+        if (!found) return null
+
 
         return found?.permissions_ids
     }

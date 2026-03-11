@@ -1,6 +1,7 @@
 export enum EnumResourcePermission{
     USER = 'user',
-    TENANT = 'tenant'
+    TENANT = 'tenant',
+    PLAN = 'plan'
 }
 
 export enum EnumActionPermission{

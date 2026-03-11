@@ -8,6 +8,7 @@ import { IsPublic, RequirePermissions } from 'src/common/decorators/auth.metadat
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @IsPublic()
   @Post('new')
   async createUser(@Body() createUserDto : CreateUserDto) : Promise<any> {
     return this.userService.createUser(createUserDto)

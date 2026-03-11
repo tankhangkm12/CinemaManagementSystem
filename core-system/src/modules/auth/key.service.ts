@@ -12,7 +12,7 @@ export class KeyService implements OnModuleInit {
 
     private keyCache = new Map<string, string>();
 
-    private readonly KEY_TTL = 60 * 60 + 15 * 60 + 5 * 60; // 1h20m
+    private readonly KEY_TTL = 3600*24; // 1h20m
 
     constructor(
         @Inject(AuthCacheRepository)

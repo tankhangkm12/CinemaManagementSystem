@@ -24,7 +24,7 @@ export class CreateUserDto {
 
     @IsString()
     @IsOptional() // Vì mặc định là null trong schema
-    tenant_id?: string | undefined;
+    tenant?: string | undefined;
 
     @IsString()
     @IsNotEmpty({ message: 'Số điện thoại không được để trống' })

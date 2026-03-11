@@ -1,5 +1,6 @@
 import { AdvantageFeature } from "src/modules/plan/plan.enum";
 import * as bcrypt from 'bcrypt'
+import slugify from 'slugify'
 export const checkAdvantageFeturesExist = (
     features: [string]
 ) => {
@@ -18,4 +19,17 @@ export const hash = async (password : string) => {
 
 export const compare = async (password : string, hashedPassword : string) => {
     return await bcrypt.compare(password, hashedPassword);
+}
+
+export const  createSlug = (name : string) => {
+    const slug = slugify(
+        name,
+        {
+            lower: true,
+            strict: true,
+            trim: true
+        }
+    )
+
+    return slug
 }

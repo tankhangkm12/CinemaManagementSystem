@@ -3,6 +3,7 @@ import { LoggerService } from 'src/common/logger/logger.service';
 import { RoleRepository } from './role.repository';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
+import { Permission } from './schemas/permission.schema';
 
 @Injectable()
 export class RoleService {
@@ -55,8 +56,13 @@ export class RoleService {
     }
 
     async getPermissionsByRoleId(roleId : string) : Promise<any> {
+        console.log(roleId)
+
         const permissions_ids = await this.role.getPermissionsByRoleId(roleId)
-        return permissions_ids?.map(permission => permission.code)
+
+        if (!permissions_ids) return null
+
+        return permissions_ids?.map( (permission : Permission)  => permission.code)
     }
 
     

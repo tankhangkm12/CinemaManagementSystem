@@ -44,7 +44,7 @@ export class AuthService {
       ...registerUserDTO,
       role_id: undefined,
       role: 'USER',
-      tenant_id: undefined,
+      tenant: undefined,
     };
 
     const user = await this.userService.createUser(createUserDto);
@@ -54,15 +54,22 @@ export class AuthService {
   }
 
   async signIn(loginUserDto: LoginUserDto) {
-    const foundUser = await this.userService.getUserByEmail(loginUserDto.email);
+    const foundUser = await this.userService.getUserForAuth(loginUserDto.email);
+
     if (!foundUser) throw new BadRequestException('User not found');
+
+    if (foundUser.is_active === false) throw new BadRequestException('User was banned');
+
+    console.log({foundUser})
 
     const isMatch = await compare(loginUserDto.password, foundUser.password);
     if (!isMatch) throw new BadRequestException('Password not match');
 
     this.logger.log(`User ${foundUser.email} login`);
 
-    return this.issueToken(foundUser.userId);
+    const token = await this.issueToken(foundUser.userId);
+
+    return token;
   }
 
   async verifyToken(token: string): Promise<any> {
@@ -103,7 +110,10 @@ export class AuthService {
     const user = await this.userService.getUserById(userId);
     if (!user) return false;
 
-    const permissions = await this.roleService.getPermissionsByRoleId(user.role_id);
+    const permissions = await this.roleService.getPermissionsByRoleId(user.role.role_id);
+
+    if (!permissions) return false;
+
     return requirePermissions.every((p) => permissions.includes(p));
   }
 }
