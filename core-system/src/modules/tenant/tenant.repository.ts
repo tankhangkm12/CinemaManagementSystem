@@ -28,7 +28,7 @@ export class MongoDbTenantRepository extends TenantRepository{
 
     async checkTenantExistById(id: string): Promise<any> {
         return await this.tenantModel.findOne({tenant_id : id,is_active : true})
-            .select({tenant_id : 1,name : 1})
+            .select({tenant_id : 1,name : 1,slug : 1})
             .lean()
     }
 
