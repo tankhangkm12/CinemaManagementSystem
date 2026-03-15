@@ -1,5 +1,3 @@
-
-
 import { Types } from 'mongoose';
 import { SubscriptionStatus } from '../schemas/tenant';
 

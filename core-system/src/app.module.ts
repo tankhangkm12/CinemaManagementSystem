@@ -21,6 +21,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthorizationGuard } from './common/guard/authorization.guard';
 import { RoleModule } from './modules/role/role.module';
 import { RenewTokenInterceptor } from './common/interceptors/renew-token.interceptor';
+import { CinemaModule } from './modules/cinema/cinema.module';
 
 @Module({
   imports: [
@@ -46,7 +47,8 @@ import { RenewTokenInterceptor } from './common/interceptors/renew-token.interce
     DatabaseModule,
     PlanModule,
     CacheModule,
-    RoleModule
+    RoleModule,
+    CinemaModule
   ],
   providers : [
     {
